@@ -12,6 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Print trigger info
+        run: |
+          echo "Triggered by: $GITHUB_EVENT_NAME"
+          date
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
