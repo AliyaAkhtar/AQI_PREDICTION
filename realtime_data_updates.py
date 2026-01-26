@@ -150,7 +150,7 @@ def update_feature_store():
         "hour", "day_of_week", "is_weekend"
     ]]
 
-    fg.insert(new_rows, write_options={"wait_for_job": True})
+    fg.insert(new_rows, write_options={"wait_for_job": False})
     print(f"Inserted {len(new_rows)} row(s) into Hopsworks for {prev_hour_ts}.")
 
 if __name__ == "__main__":
