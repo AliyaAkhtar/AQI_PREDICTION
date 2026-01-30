@@ -1,6 +1,5 @@
 # 1st activate the virtual env using venv\Scripts\activate
 
-
 requests
 pandas
 python-dotenv
@@ -8,3 +7,9 @@ hopsworks==4.2.*
 confluent-kafka
 numpy
 pyarrow
+pymongo 
+mlflow 
+scikit-learn 
+xgboost 
+lightgbm
+certifi   

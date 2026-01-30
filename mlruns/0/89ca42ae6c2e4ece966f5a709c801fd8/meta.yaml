@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Hp/Desktop/AQI PREDICTION BACKEND/mlruns/0/89ca42ae6c2e4ece966f5a709c801fd8/artifacts
+end_time: 1769777735421
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 89ca42ae6c2e4ece966f5a709c801fd8
+run_name: XGBoost_AQI_Forecast
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769777732122
+status: 3
+tags: []
+user_id: Hp

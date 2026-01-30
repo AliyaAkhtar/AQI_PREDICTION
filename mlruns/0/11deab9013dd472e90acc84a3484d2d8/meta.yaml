@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Hp/Desktop/AQI PREDICTION BACKEND/mlruns/0/11deab9013dd472e90acc84a3484d2d8/artifacts
+end_time: 1769777208879
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 11deab9013dd472e90acc84a3484d2d8
+run_name: Ridge_AQI_Forecast
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769777205422
+status: 3
+tags: []
+user_id: Hp

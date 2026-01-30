@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/Hp/Desktop/AQI PREDICTION BACKEND/mlruns/0/70aeec8595d94ee695fb939ff0b77f3f/artifacts
+end_time: 1769773529360
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 70aeec8595d94ee695fb939ff0b77f3f
+run_name: RandomForest_AQI_Forecast
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1769773522853
+status: 3
+tags: []
+user_id: Hp

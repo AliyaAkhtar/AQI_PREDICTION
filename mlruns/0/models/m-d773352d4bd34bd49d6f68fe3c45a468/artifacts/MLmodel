@@ -1,0 +1,22 @@
+artifact_path: file:C:/Users/Hp/Desktop/AQI PREDICTION BACKEND/mlruns/0/models/m-d773352d4bd34bd49d6f68fe3c45a468/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.6
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+mlflow_version: 3.8.1
+model_id: m-d773352d4bd34bd49d6f68fe3c45a468
+model_size_bytes: 2906
+model_uuid: m-d773352d4bd34bd49d6f68fe3c45a468
+prompts: null
+run_id: 1d8e0e3827804543bd01cf149ab68b2c
+utc_time_created: '2026-01-30 12:43:23.389676'

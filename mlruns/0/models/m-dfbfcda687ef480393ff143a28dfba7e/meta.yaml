@@ -1,0 +1,10 @@
+artifact_location: file:C:/Users/Hp/Desktop/AQI PREDICTION BACKEND/mlruns/0/models/m-dfbfcda687ef480393ff143a28dfba7e/artifacts
+creation_timestamp: 1769773580841
+experiment_id: '0'
+last_updated_timestamp: 1769773587762
+model_id: m-dfbfcda687ef480393ff143a28dfba7e
+model_type: null
+name: model
+source_run_id: 66805c37ca3f432a882fd38172bf0096
+status: 2
+status_message: null
