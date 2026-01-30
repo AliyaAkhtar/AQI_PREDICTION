@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 CITY = os.getenv("CITY", "Karachi")
-LAT = float(os.getenv("LAT"))
-LON = float(os.getenv("LON"))
+LAT = float(os.getenv("LAT", 24.8607))
+LON = float(os.getenv("LON", 67.0011))
 BACKFILL_DAYS = int(os.getenv("BACKFILL_DAYS", 90))
 
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
