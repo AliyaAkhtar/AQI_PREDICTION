@@ -13,13 +13,14 @@ from features.feature_engineering import (
     add_future_targets
 )
 from feature_store.mongodb_store import upsert_features, load_recent_history
+from config.config import CITY, LAT, LON, OPENWEATHER_API_KEY
 
 load_dotenv()
 
-CITY = os.getenv("CITY")
-LAT = float(os.getenv("LAT"))
-LON = float(os.getenv("LON"))
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
+# CITY = os.getenv("CITY")
+# LAT = float(os.getenv("LAT"))
+# LON = float(os.getenv("LON"))
+# OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 def fetch_pollution_last_hour(start_unix, end_unix):
     url = "http://api.openweathermap.org/data/2.5/air_pollution/history"
