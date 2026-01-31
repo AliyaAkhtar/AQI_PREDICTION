@@ -3,7 +3,6 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
-
 from features.preprocessing import clean_data, cap_outliers
 from features.feature_engineering import (
     add_time_features,
@@ -13,7 +12,7 @@ from features.feature_engineering import (
     add_weather_interactions,
     add_future_targets
 )
-from feature_store.mongodb_store import upsert_features
+from feature_store.mongodb_store import upsert_features, load_recent_history
 
 load_dotenv()
 
@@ -54,14 +53,13 @@ def fetch_pollution_last_hour(start_unix, end_unix):
 
     return pd.DataFrame(rows)
 
-def fetch_weather_last_hour(date_str):
-    url = "https://archive-api.open-meteo.com/v1/archive"
+def fetch_weather_last_hour():
+    url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": LAT,
         "longitude": LON,
-        "start_date": date_str,
-        "end_date": date_str,
         "hourly": "temperature_2m,relativehumidity_2m,pressure_msl,windspeed_10m",
+        "past_hours": 2,        
         "timezone": "UTC"
     }
 
@@ -89,16 +87,30 @@ def run_hourly_ingestion():
         int(end_time.timestamp())
     )
 
+    pollution_df = pollution_df.drop_duplicates(subset=["timestamp"])
+
     if pollution_df.empty:
         print("No pollution data returned. Skipping...")
         return
 
-    weather_df = fetch_weather_last_hour(start_time.date().isoformat())
-
+    weather_df = fetch_weather_last_hour()
+    weather_df = weather_df[
+        (weather_df["timestamp"] >= start_time) &
+        (weather_df["timestamp"] < end_time)
+    ]
+    
     # Merge
     df = pd.merge(pollution_df, weather_df, on="timestamp", how="inner")
 
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+
     df["city"] = CITY
+
+    # Load past 72 hours so lag features work
+    history_df = load_recent_history(hours=72, city=CITY)
+
+    # Combine old + new
+    df = pd.concat([history_df, df]).sort_values("timestamp").reset_index(drop=True)
 
     df = clean_data(df)
     df = cap_outliers(df)
@@ -108,7 +120,9 @@ def run_hourly_ingestion():
     df = add_lag_features(df)
     df = add_rolling_features(df)
     df = add_weather_interactions(df)
-    df = add_future_targets(df)
+
+    # Keep ONLY the newest hour rows to insert back
+    df = df[df["timestamp"] >= start_time]
 
     upsert_features(df)
 

@@ -8,7 +8,6 @@ collection = client[MONGO_DB][MONGO_COLLECTION]
 
 collection.create_index([("city", 1), ("timestamp", 1)], unique=True)
 
-
 def upsert_features(df):
     ops = []
     for r in df.to_dict("records"):
@@ -22,9 +21,6 @@ def upsert_features(df):
     if ops:
         res = collection.bulk_write(ops)
         print(f"Inserted: {res.upserted_count}, Updated: {res.modified_count}")
-
-
-
 
 def load_features(city=None):
     """
@@ -54,3 +50,39 @@ def load_features(city=None):
     df.reset_index(drop=True, inplace=True)
 
     return df
+
+def load_recent_history(hours=72, city=None):
+    """
+    Load recent historical rows from MongoDB to compute lag/rolling features.
+    Default = last 72 hours (needed for 3-day lags)
+    """
+    from datetime import datetime, timedelta, timezone
+
+    client = MongoClient(MONGO_URI)
+    db = client[MONGO_DB]
+    collection = db[MONGO_COLLECTION]
+
+    cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
+
+    query = {"timestamp": {"$gte": cutoff_time}}
+    if city:
+        query["city"] = city
+
+    data = list(collection.find(query))
+
+    if not data:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(data)
+
+    if "_id" in df.columns:
+        df.drop(columns=["_id"], inplace=True)
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+
+    df.sort_values("timestamp", inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
+    return df
+
+

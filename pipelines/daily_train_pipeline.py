@@ -12,6 +12,7 @@ import models.train_linear as lr
 import os
 import mlflow
 from dotenv import load_dotenv
+from features.feature_engineering import add_future_targets
 
 load_dotenv()
 
@@ -29,6 +30,13 @@ def prepare_data(df):
     Prepare features (X) and multi-horizon targets (y)
     """
 
+    # Ensure time order
+    df = df.sort_values("timestamp")
+
+    # Create future AQI targets 
+    df = add_future_targets(df)
+
+    # Drop rows where future AQI is not available
     df = df.dropna(subset=TARGET_COLS)
 
     drop_cols = [
@@ -48,7 +56,6 @@ def prepare_data(df):
     y_train, y_test = y.iloc[:split_index], y.iloc[split_index:]
 
     return X_train, X_test, y_train, y_test
-
 
 def log_model(model, run_name, params, y_test, preds):
     """
