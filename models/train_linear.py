@@ -5,6 +5,8 @@ from sklearn.impute import SimpleImputer
 from feature_store.mongodb_store import load_features
 
 def train_model(prepare_data, log_model):
+    print("Training Ridge model...")
+
     # Load data
     df = load_features()
     X_train, X_test, y_train, y_test = prepare_data(df)

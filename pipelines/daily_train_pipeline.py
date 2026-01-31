@@ -9,9 +9,17 @@ import models.train_random_forest as rf
 import models.train_lightgbm as lgbm
 import models.train_xgboost as xgb
 import models.train_linear as lr
+import os
+import mlflow
+from dotenv import load_dotenv
 
-# Use MLflow server locally
-# mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000"))
+load_dotenv()
+
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
+os.environ["MLFLOW_TRACKING_USERNAME"] = os.getenv("MLFLOW_TRACKING_USERNAME")
+os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("MLFLOW_TRACKING_PASSWORD")
+
+print("MLflow Tracking URI:", mlflow.get_tracking_uri())
 
 # TRAIN BASE FUNCTIONS
 TARGET_COLS = ["aqi_t_plus_24", "aqi_t_plus_48", "aqi_t_plus_72"]
@@ -64,23 +72,3 @@ rf.train_model(prepare_data, log_model)
 lgbm.train_model(prepare_data, log_model)
 xgb.train_model(prepare_data, log_model)
 lr.train_model(prepare_data, log_model)
-
-# model_scripts = [
-#     "models/train_random_forest.py",
-#     "models/train_lightgbm.py",
-#     "models/train_xgboost.py",
-#     "models/train_linear.py"
-# ]
-
-# for script in model_scripts:
-#     print(f"Running {script} ...")
-#     # Run each model script as a separate Python process
-#     module_name = script.replace("/", ".").replace(".py", "")
-#     result = subprocess.run([sys.executable, "-m", module_name], capture_output=True, text=True)
-    
-#     # Print stdout and stderr
-#     print(result.stdout)
-#     if result.stderr:
-#         print("Errors:", result.stderr)
-    
-#     print(f"{script} completed.\n")

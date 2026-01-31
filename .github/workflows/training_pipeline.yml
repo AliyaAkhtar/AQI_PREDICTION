@@ -34,7 +34,11 @@ jobs:
           MONGO_DB: ${{ secrets.MONGO_DB }}
           MONGO_COLLECTION: ${{ secrets.MONGO_COLLECTION }}
           CITY: ${{ secrets.CITY }}
+
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+
         run: |
           python -m pipelines.daily_train_pipeline
 
