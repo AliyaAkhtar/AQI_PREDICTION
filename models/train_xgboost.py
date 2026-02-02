@@ -21,4 +21,8 @@ def train_model(prepare_data, log_model):
     model.fit(X_train, y_train)
 
     preds = model.predict(X_test)
-    log_model(model, "XGBoost_AQI_Forecast", params, y_test, preds)
+    # log_model(model, "XGBoost_AQI_Forecast", params, y_test, preds)
+    # log_model(model, "XGBoost_AQI_Forecast", params, X_train, y_test, preds)
+    
+    version, rmse = log_model(model, "XGBoost_AQI_Forecast", params, X_train, y_test, preds)
+    return version, rmse

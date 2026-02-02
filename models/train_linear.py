@@ -25,4 +25,8 @@ def train_model(prepare_data, log_model):
     preds = model.predict(X_test)
 
     # Log to MLflow
-    log_model(model, "Ridge_AQI_Forecast", params, y_test, preds)
+    # log_model(model, "Ridge_AQI_Forecast", params, y_test, preds)
+    # log_model(model, "Ridge_AQI_Forecast", params, X_train, y_test, preds)
+    
+    version, rmse = log_model(model, "Ridge_AQI_Forecast", params, X_train, y_test, preds)
+    return version, rmse
