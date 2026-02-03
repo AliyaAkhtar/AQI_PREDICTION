@@ -1,5 +1,7 @@
 import lightgbm as lgb
 from sklearn.multioutput import MultiOutputRegressor
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
 from feature_store.mongodb_store import load_features
 
 def train_model(prepare_data, log_model):
@@ -15,12 +17,15 @@ def train_model(prepare_data, log_model):
         "random_state": 42
     }
 
-    model = MultiOutputRegressor(lgb.LGBMRegressor(**params))
-    model.fit(X_train, y_train)
+    base_model = lgb.LGBMRegressor(**params)
 
+    model = Pipeline([
+        ("imputer", SimpleImputer(strategy="mean")),
+        ("regressor", MultiOutputRegressor(base_model))
+    ])
+
+    model.fit(X_train, y_train)
     preds = model.predict(X_test)
-    # log_model(model, "LightGBM_AQI_Forecast", params, y_test, preds)
-    # log_model(model, "LightGBM_AQI_Forecast", params, X_train, y_test, preds)
-   
+
     version, rmse = log_model(model, "LightGBM_AQI_Forecast", params, X_train, y_test, preds)
     return version, rmse

@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 import pandas as pd
-
 from data_sources.pollution_api import fetch_pollution_history
 from data_sources.weather_api import fetch_weather_history
 from features.preprocessing import clean_data, cap_outliers
@@ -10,12 +9,12 @@ from features.feature_engineering import (
     add_lag_features,
     add_rolling_features,
     add_weather_interactions,
-    add_future_targets   
+    add_future_targets,
+    add_real_aqi   
 )
 
 from feature_store.mongodb_store import upsert_features
 from config.config import CITY, BACKFILL_DAYS
-
 
 def run_backfill():
     end_dt = datetime.now(timezone.utc)
@@ -31,6 +30,7 @@ def run_backfill():
 
     # Preprocessing
     df = clean_data(df)
+    df = add_real_aqi(df)  
     df = cap_outliers(df)
 
     # Feature Engineering
@@ -44,7 +44,6 @@ def run_backfill():
     # Insert all rows
     upsert_features(df)
     print("Backfill completed successfully!")
-
 
 if __name__ == "__main__":
     run_backfill()

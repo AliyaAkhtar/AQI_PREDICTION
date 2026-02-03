@@ -2,7 +2,6 @@ import requests
 import pandas as pd
 from config.config import LAT, LON
 
-
 def fetch_weather_history(start_date, end_date):
     url = "https://archive-api.open-meteo.com/v1/archive"
 

@@ -12,15 +12,11 @@ from features.feature_engineering import (
     add_weather_interactions,
     add_future_targets
 )
+from features.feature_engineering import add_real_aqi
 from feature_store.mongodb_store import upsert_features, load_recent_history
 from config.config import CITY, LAT, LON, OPENWEATHER_API_KEY
 
 load_dotenv()
-
-# CITY = os.getenv("CITY")
-# LAT = float(os.getenv("LAT"))
-# LON = float(os.getenv("LON"))
-# OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 def fetch_pollution_last_hour(start_unix, end_unix):
     url = "http://api.openweathermap.org/data/2.5/air_pollution/history"
@@ -81,49 +77,46 @@ def run_hourly_ingestion():
     end_time = now
     start_time = now - timedelta(hours=1)
 
-    print(f"Fetching data for window: {start_time} → {end_time}")
-
     pollution_df = fetch_pollution_last_hour(
         int(start_time.timestamp()),
         int(end_time.timestamp())
-    )
-
-    pollution_df = pollution_df.drop_duplicates(subset=["timestamp"])
+    ).drop_duplicates(subset=["timestamp"])
 
     if pollution_df.empty:
         print("No pollution data returned. Skipping...")
         return
 
     weather_df = fetch_weather_last_hour()
-    weather_df = weather_df[
-        (weather_df["timestamp"] >= start_time) &
-        (weather_df["timestamp"] < end_time)
-    ]
-    
-    # Merge
-    df = pd.merge(pollution_df, weather_df, on="timestamp", how="inner")
 
-    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+    df = pd.merge_asof(
+        pollution_df.sort_values("timestamp"),
+        weather_df.sort_values("timestamp"),
+        on="timestamp",
+        direction="nearest",
+        tolerance=pd.Timedelta("30min")
+    )
 
     df["city"] = CITY
 
-    # Load past 72 hours so lag features work
     history_df = load_recent_history(hours=72, city=CITY)
 
-    # Combine old + new
     df = pd.concat([history_df, df]).sort_values("timestamp").reset_index(drop=True)
 
+    #  PREPROCESS 
     df = clean_data(df)
+    df = add_real_aqi(df)   
     df = cap_outliers(df)
 
+    #  FEATURES 
     df = add_time_features(df)
     df = add_cyclical_time_features(df)
     df = add_lag_features(df)
     df = add_rolling_features(df)
     df = add_weather_interactions(df)
 
-    # Keep ONLY the newest hour rows to insert back
+    # Keep only newest rows & drop incomplete feature rows
     df = df[df["timestamp"] >= start_time]
+    df = df.dropna()
 
     upsert_features(df)
 

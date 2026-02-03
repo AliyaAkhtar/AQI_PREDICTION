@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 from datetime import datetime, timezone
 from config.config import LAT, LON, OPENWEATHER_API_KEY
-
+from features.aqi_calculator import compute_overall_aqi
 
 def fetch_pollution_history(start_dt, end_dt):
     url = "http://api.openweathermap.org/data/2.5/air_pollution/history"
@@ -23,7 +23,7 @@ def fetch_pollution_history(start_dt, end_dt):
         ts = datetime.fromtimestamp(item["dt"], tz=timezone.utc)
         comp = item["components"]
 
-        rows.append({
+        row = {
             "timestamp": ts,
             "pm2_5": comp.get("pm2_5"),
             "pm10": comp.get("pm10"),
@@ -31,7 +31,11 @@ def fetch_pollution_history(start_dt, end_dt):
             "so2": comp.get("so2"),
             "o3": comp.get("o3"),
             "co": comp.get("co"),
-            "us_aqi": item.get("main", {}).get("aqi")
-        })
+            "us_aqi": item.get("main", {}).get("aqi")  
+        }
+
+        row["real_aqi"] = compute_overall_aqi(row)
+
+        rows.append(row)
 
     return pd.DataFrame(rows)

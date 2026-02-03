@@ -24,33 +24,26 @@ os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("MLFLOW_TRACKING_PASSWORD")
 
 print("MLflow Tracking URI:", mlflow.get_tracking_uri())
 
-# TRAIN BASE FUNCTIONS
 TARGET_COLS = ["aqi_t_plus_24", "aqi_t_plus_48", "aqi_t_plus_72"]
 
 def prepare_data(df):
-    """
-    Prepare features (X) and multi-horizon targets (y)
-    """
-
-    # Ensure time order
     df = df.sort_values("timestamp")
 
-    # Create future AQI targets 
-    df = add_future_targets(df)
+    if "aqi_t_plus_24" not in df.columns:
+        df = add_future_targets(df)
 
-    # Drop rows where future AQI is not available
     df = df.dropna(subset=TARGET_COLS)
 
     drop_cols = [
         "timestamp",
         "city",
-        "us_aqi",
+        "us_aqi",   
         "aqi_t_plus_24",
         "aqi_t_plus_48",
         "aqi_t_plus_72"
     ]
 
-    X = df.drop(columns=drop_cols)
+    X = df.drop(columns=[c for c in drop_cols if c in df.columns])
     y = df[TARGET_COLS]
 
     split_index = int(len(df) * 0.8)
@@ -59,46 +52,27 @@ def prepare_data(df):
 
     return X_train, X_test, y_train, y_test
 
-# def log_model(model, run_name, params, y_test, preds):
-#     """
-#     Log multi-output metrics to MLflow
-#     """
-#     horizons = ["24h", "48h", "72h"]
-#     with mlflow.start_run(run_name=run_name):
-#         for k, v in params.items():
-#             mlflow.log_param(k, v)
-#         for i, h in enumerate(horizons):
-#             mae = mean_absolute_error(y_test.iloc[:, i], preds[:, i])
-#             rmse = np.sqrt(mean_squared_error(y_test.iloc[:, i], preds[:, i]))
-#             mlflow.log_metric(f"MAE_{h}", mae)
-#             mlflow.log_metric(f"RMSE_{h}", rmse)
-#         mlflow.sklearn.log_model(model, "model")
-#     print(f"{run_name} logged to MLflow")
-
 def log_model(model, run_name, params, X_train, y_test, preds):
     horizons = ["24h", "48h", "72h"]
+    rmses = []
 
     with mlflow.start_run(run_name=run_name) as run:
-        run_id = run.info.run_id
 
-        # Log parameters
         for k, v in params.items():
             mlflow.log_param(k, v)
 
-        # Log metrics for each horizon
         for i, h in enumerate(horizons):
             mae = mean_absolute_error(y_test.iloc[:, i], preds[:, i])
             rmse = np.sqrt(mean_squared_error(y_test.iloc[:, i], preds[:, i]))
             mlflow.log_metric(f"MAE_{h}", mae)
             mlflow.log_metric(f"RMSE_{h}", rmse)
+            rmses.append(rmse)
 
-        # Save RMSE_24h separately (this decides Production)
-        rmse_24 = np.sqrt(mean_squared_error(y_test.iloc[:, 0], preds[:, 0]))
+        avg_rmse = float(np.mean(rmses))
+        mlflow.log_metric("RMSE_avg", avg_rmse)
 
-        # Infer input/output schema
         signature = infer_signature(X_train, model.predict(X_train))
 
-        # Log model artifact
         model_info = mlflow.sklearn.log_model(
             sk_model=model,
             name="model",
@@ -106,33 +80,14 @@ def log_model(model, run_name, params, X_train, y_test, preds):
             input_example=X_train.head(1)
         )
 
-        # Register model in registry
         mv = mlflow.register_model(
             model_uri=model_info.model_uri,
             name="AQI_Forecast_Model"
         )
 
-        print(f" Registered {run_name} as version {mv.version} (RMSE_24h={rmse_24:.4f})")
+        print(f" Registered {run_name} as version {mv.version} (AVG_RMSE={avg_rmse:.4f})")
 
-        return mv.version, rmse_24
-
-# def promote_latest_model():
-#     client = MlflowClient()
-#     model_name = "AQI_Forecast_Model"
-
-#     versions = client.search_model_versions(f"name='{model_name}'")
-
-#     # Latest version
-#     latest_version = max(int(v.version) for v in versions)
-
-#     client.transition_model_version_stage(
-#         name=model_name,
-#         version=str(latest_version),
-#         stage="Production",
-#         archive_existing_versions=True
-#     )
-
-#     print(f"Latest version {latest_version} promoted to Production")
+        return int(mv.version), avg_rmse
 
 def promote_best_of_today(versions_this_run):
     client = MlflowClient()
@@ -148,14 +103,12 @@ def promote_best_of_today(versions_this_run):
         archive_existing_versions=True
     )
 
-    print(f"Version {best_version} promoted to Production (RMSE_24h={best_rmse})")
+    print(f"\n BEST MODEL SELECTED")
+    print(f"   ➜ Version: {best_version}")
+    print(f"   ➜ Avg RMSE: {best_rmse:.4f}")
+    print("   ➜ Promoted to PRODUCTION\n")
 
 # PIPELINE: RUN ALL MODELS
-# rf.train_model(prepare_data, log_model)
-# lgbm.train_model(prepare_data, log_model)
-# xgb.train_model(prepare_data, log_model)
-# lr.train_model(prepare_data, log_model)
-
 versions_this_run = []
 
 v, rmse = rf.train_model(prepare_data, log_model)
