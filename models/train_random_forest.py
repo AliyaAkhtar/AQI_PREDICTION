@@ -3,7 +3,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from feature_store.mongodb_store import load_features
 
 def train_model(prepare_data, log_model):
-    print("Training XgBoost model...")
+    print("Training Random Forest model...")
 
     df = load_features()
     X_train, X_test, y_train, y_test = prepare_data(df)
@@ -22,5 +22,5 @@ def train_model(prepare_data, log_model):
 
     preds = model.predict(X_test)
    
-    version, rmse = log_model(model, "XGBoost_AQI_Forecast", params, X_train, y_test, preds)
+    version, rmse = log_model(model, "RandomForest_AQI_Forecast", params, X_train, y_test, preds)
     return version, rmse
