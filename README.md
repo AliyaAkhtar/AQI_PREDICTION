@@ -1,7 +1,3 @@
-Absolutely! Here’s a **cleaned-up, complete README.md** markdown file with the sections you requested:
-
----
-
 ```markdown
 # 🌍 AQI Prediction System
 
