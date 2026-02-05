@@ -2,8 +2,6 @@
 
 A comprehensive **Air Quality Index (AQI) Prediction System** for real-time monitoring, forecasting, and visualization of air quality in cities. This repository integrates **data collection, feature engineering, machine learning modeling, and an interactive dashboard** for both historical and predicted AQI values.
 
----
-
 ## 🔹 Table of Contents
 - [Overview](#overview)
 - [System Architecture](#system-architecture)
@@ -13,8 +11,6 @@ A comprehensive **Air Quality Index (AQI) Prediction System** for real-time moni
 - [Installation & Setup](#installation--setup)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
-
----
 
 ## 🔹 Overview
 
@@ -26,8 +22,6 @@ Air pollution is a major public health concern, and timely AQI information is cr
 4. **Model Performance Monitoring** — Tracks MAE, RMSE, and versioning for production and experimental models.
 
 The system is designed to support **real-time AQI monitoring, forecasting, and visualization** for urban areas.
-
----
 
 ## 🔹 System Architecture
 
@@ -51,8 +45,6 @@ The AQI Prediction System is built using a **modular architecture**:
    - React-based dashboard that visualizes AQI trends interactively.  
    - Supports dynamic time range selection and chart types (Line/Area).  
 
----
-
 ## 🔹 Features
 
 - Real-time AQI monitoring  
@@ -63,8 +55,6 @@ The AQI Prediction System is built using a **modular architecture**:
 - Production model tracking and evaluation metrics (MAE/RMSE)  
 - Historical AQI visualization in an interactive graph  
 
----
-
 ## 🔹 Tech Stack
 
 - **Backend**: Python, FastAPI  
@@ -74,9 +64,9 @@ The AQI Prediction System is built using a **modular architecture**:
 - **Model Tracking**: MLflow  
 - **Environment**: Docker optional, Python virtual environment  
 
----
-
 ## 🔹 Folder Structure
+
+```text
 .
 ├── api/                       # Backend FastAPI code, routes, controllers
 ├── aqi-dashboard-frontend/    # React frontend for AQI visualization
@@ -91,28 +81,34 @@ The AQI Prediction System is built using a **modular architecture**:
 ├── mlflow.db                  # MLflow database for model tracking
 ├── requirements.txt           # Python dependencies
 └── README.md                  # Project documentation
+````
 
 **Key Notes:**
-- `api/` exposes endpoints like `/aqi/history` and `/aqi/forecast`.
-- `feature_store/` stores processed features ready for model input.
-- `models/` contains production-ready and experimental model versions.
-- `aqi-dashboard-frontend/` consumes API endpoints and renders charts & cards.
 
----
+* `api/` exposes endpoints like `/aqi/history` and `/aqi/forecast`.
+* `feature_store/` stores processed features ready for model input.
+* `models/` contains production-ready and experimental model versions.
+* `aqi-dashboard-frontend/` consumes API endpoints and renders charts & cards.
 
 ## 🔹 Installation & Setup
 
 ### 1. Clone the repository
+
 ```bash
 git clone https://github.com/AliyaAkhtar/AQI_PREDICTION.git
 cd AQI_PREDICTION
-````
+```
 
 ### 2. Backend Setup
+
 ```bash
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
+# Activate virtual environment
+# Linux / Mac
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
+
 pip install -r requirements.txt
 ```
 
@@ -130,15 +126,12 @@ npm install
 npm start
 ```
 
----
-
 ## 🔹 Usage
 
 * Access dashboard at: `http://localhost:3000`
-* Fetch **historical AQI** and visualize interactively.
-* Monitor **production model performance metrics**.
-
----
+* Historical AQI is fetched automatically on load.
+* Interactive graph shows **historical AQI** and **3-day forecast**.
+* Monitor **production model performance metrics** in the dashboard table.
 
 ## 🔹 API Endpoints
 
