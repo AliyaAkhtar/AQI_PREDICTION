@@ -1,6 +1,6 @@
 # 🌍 AQI Prediction System
 
-A comprehensive **Air Quality Index (AQI) Prediction System** for real-time monitoring, forecasting, and visualization of air quality in cities. This repository integrates **data collection, feature engineering, machine learning modeling, and an interactive dashboard** for both historical and predicted AQI values.
+A comprehensive **Air Quality Index (AQI) Prediction System** for real-time monitoring, forecasting, and visualization of air quality in Karachi. This repository integrates **data collection, feature engineering, machine learning modeling, and an interactive dashboard** for both historical and predicted AQI values.
 
 ## 🔹 Table of Contents
 - [Overview](#overview)
@@ -17,25 +17,25 @@ A comprehensive **Air Quality Index (AQI) Prediction System** for real-time moni
 Air pollution is a major public health concern, and timely AQI information is crucial for planning outdoor activities and policymaking. This repository provides:
 
 1. **Historical AQI data tracking** — Collects and stores hourly AQI data.  
-2. **AQI Forecasting** — Predicts air quality for the next 3–7 days using machine learning models.  
+2. **AQI Forecasting** — Predicts air quality for the next 3 days using machine learning models.  
 3. **Interactive Dashboard** — Displays historical data and forecasts in an easy-to-understand interface.  
 4. **Model Performance Monitoring** — Tracks MAE, RMSE, and versioning for production and experimental models.
 
-The system is designed to support **real-time AQI monitoring, forecasting, and visualization** for urban areas.
+The system is designed to support **real-time AQI monitoring, forecasting, and visualization** for Karachi area.
 
 ## 🔹 System Architecture
 
 The AQI Prediction System is built using a **modular architecture**:
 
 1. **Data Collection Layer**  
-   - Collects real-time AQI data from external APIs or local sensors.  
-   - Stores historical data for modeling and analysis.
+   - Collects real-time AQI data from external APIs like OpenWeatherMap and OpenMeteo.  
+   - Stores historical data for modeling and analysis using Mongodb as a feature store .
 
 2. **Feature Engineering Layer**  
    - Generates lag features and relevant environmental features for predictive modeling.
 
 3. **Machine Learning Layer**  
-   - Trains regression models (e.g., Random Forest, Gradient Boosting) to predict AQI for future hours/days.  
+   - Trains regression models (Random Forest, XGBoost, Ridge & LightGBM) to predict AQI for future 3 days.  
    - Tracks model metrics in **MLflow** for reproducibility.
 
 4. **API Layer**  
@@ -58,11 +58,11 @@ The AQI Prediction System is built using a **modular architecture**:
 ## 🔹 Tech Stack
 
 - **Backend**: Python, FastAPI  
-- **Frontend**: React, Recharts, Tailwind CSS  
-- **Database**: MongoDB (for historical and feature data)  
+- **Frontend**: React, Recharts, CSS  
+- **Feature Store**: MongoDB (for historical and feature data)  
 - **Machine Learning**: scikit-learn, pandas, numpy  
-- **Model Tracking**: MLflow  
-- **Environment**: Docker optional, Python virtual environment  
+- **Model Tracking**: MLflow, DagsHub  
+- **Environment**: Python virtual environment  
 
 ## 🔹 Folder Structure
 
@@ -70,11 +70,11 @@ The AQI Prediction System is built using a **modular architecture**:
 .
 ├── api/                       # Backend FastAPI code, routes, controllers
 ├── aqi-dashboard-frontend/    # React frontend for AQI visualization
-├── config/                    # Configuration files (environment variables, settings)
-├── data_sources/              # Raw AQI or environmental datasets
-├── feature_store/             # Generated features for ML models
+├── config/                    # Configuration files for settings
+├── data_sources/              # Raw AQI or environmental data using different apis
+├── feature_store/             # Connecting Mongodb as feature store
 ├── features/                  # Scripts to build lag and derived features
-├── models/                    # Trained ML models and saved artifacts
+├── models/                    # Train ML models and saved artifacts
 ├── pipelines/                 # Automated ML pipelines for training and evaluation
 ├── .github/workflows/         # CI/CD pipelines for deployment or model training
 ├── .gitignore
