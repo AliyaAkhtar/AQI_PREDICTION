@@ -16,6 +16,4 @@ certifi
 dagshub 
 fastapi
 uvicorn
-axios 
-recharts
 cors
