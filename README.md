@@ -1,4 +1,3 @@
-```markdown
 # 🌍 AQI Prediction System
 
 A comprehensive **Air Quality Index (AQI) Prediction System** for real-time monitoring, forecasting, and visualization of air quality in cities. This repository integrates **data collection, feature engineering, machine learning modeling, and an interactive dashboard** for both historical and predicted AQI values.
@@ -78,8 +77,6 @@ The AQI Prediction System is built using a **modular architecture**:
 ---
 
 ## 🔹 Folder Structure
-
-```
 .
 ├── api/                       # Backend FastAPI code, routes, controllers
 ├── aqi-dashboard-frontend/    # React frontend for AQI visualization
@@ -94,8 +91,6 @@ The AQI Prediction System is built using a **modular architecture**:
 ├── mlflow.db                  # MLflow database for model tracking
 ├── requirements.txt           # Python dependencies
 └── README.md                  # Project documentation
-
-````
 
 **Key Notes:**
 - `api/` exposes endpoints like `/aqi/history` and `/aqi/forecast`.
@@ -114,7 +109,6 @@ cd AQI_PREDICTION
 ````
 
 ### 2. Backend Setup
-
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
