@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from "recharts";
 import "./App.css";
@@ -18,6 +18,7 @@ function App() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [metricsLoading, setMetricsLoading] = useState(true);
   const [threeDayForecast, setThreeDayForecast] = useState([]);
+  const [todayAQI, setTodayAQI] = useState(null);
 
   // Load model metrics
   useEffect(() => {
@@ -70,12 +71,23 @@ function App() {
             year: "numeric",
             month: "short",
             day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
           }),
-          AQI: item.real_aqi
+          AQI: item.real_aqi,
+          type: "history"
         }));
-        setChartData(history);
+        const forecastRes = await axios.get(`${API_BASE}/aqi/forecast`);
+
+        const forecast = forecastRes.data.forecasts.map(f => ({
+          date: new Date(f.date).toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }),
+          AQI: f.avg_aqi,
+          type: "forecast"
+        }));
+        setChartData([...history, ...forecast]);
         setLastUpdate(new Date());
       } catch (err) {
         console.error("AQI fetch error:", err);
@@ -85,6 +97,18 @@ function App() {
     };
     loadAQIData();
   }, [selectedTimeRange]);
+
+  useEffect(() => {
+    const loadTodayAQI = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/aqi/today`);
+        setTodayAQI(res.data);
+      } catch (err) {
+        console.error("Today AQI error:", err);
+      }
+    };
+    loadTodayAQI();
+  }, []);
 
   const getAQIColor = (aqi) => {
     if (aqi <= 50) return "#10b981";
@@ -143,7 +167,7 @@ function App() {
       {/* Header */}
       <header className="header">
         <div className="header-content">
-          <h1 className="title">🌍 AQI Forecast Dashboard</h1>
+          <h1 className="title">🌍 AQI Forecast For Karachi</h1>
           <div className="header-controls">
             {lastUpdate && (
               <span className="last-update">
@@ -156,13 +180,45 @@ function App() {
 
       {/* Stats Cards */}
       <div className="stats-grid">
-        {/* Production Model */}
-        <div className="stat-card" style={{ borderLeft: "4px solid #3b82f6" }}>
-          <div className="stat-label">Production Model</div>
-          <div className="stat-value" style={{ fontSize: "1.5rem" }}>
-            {production ? production.run_name : "Loading..."}
-          </div>
-        </div>
+        {todayAQI && (() => {
+          const dateObj = new Date(todayAQI.date);
+          const weekday = dateObj.toLocaleDateString("en-US", { weekday: "long" });
+          const formattedDate = dateObj.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          });
+          const level = getLevel(todayAQI.avg_aqi);
+
+          return (
+            <div
+              className="stat-card"
+              style={{ borderLeft: `4px solid ${level.color}` }}
+            >
+              <div className="stat-label">{weekday}</div>
+
+              <div
+                className="stat-value"
+                style={{ color: level.color }}
+              >
+                {todayAQI.avg_aqi?.toFixed(0)}
+              </div>
+
+              <div className="stat-sublabel">{formattedDate}</div>
+
+              <div
+                className="aqi-level"
+                style={{
+                  marginTop: "4px",
+                  fontWeight: "bold",
+                  color: level.color
+                }}
+              >
+                {level.label}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* 3-Day Forecast Cards */}
         {threeDayForecast.map((f, idx) => {
@@ -215,6 +271,24 @@ function App() {
       {/* Model Performance */}
       <div className="card">
         <h2>📊 Model Performance Metrics</h2>
+        {production && (
+          <div
+            style={{
+              marginTop: "10px",
+              marginBottom: "10px",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              background: "rgba(59,130,246,0.08)",
+              borderLeft: "4px solid #3b82f6",
+              fontSize: "14px",
+              color: "#cbd5e1"
+            }}
+          >
+            Future AQI forecasts are generated using{" "}
+            <strong style={{ color: "#3b82f6" }}>{production.run_name}</strong>,
+            the best-performing model with the lowest MAE and RMSE.
+          </div>
+        )}
         {metricsLoading && (
           <div className="table-loader">
             ⏳ Fetching latest model metrics...
@@ -279,7 +353,7 @@ function App() {
       {/* AQI Chart */}
       <div className="card">
         <div className="chart-header">
-          <h2>📈 AQI History</h2>
+          <h2>📈 Historical + Forecast AQI Trend</h2>
           <div className="chart-controls">
             <div className="button-group">
               <button

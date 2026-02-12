@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from api.services.mongo_service import get_forecasts, get_history
+from api.services.mongo_service import get_forecasts, get_history, get_today_avg_aqi
 from config.config import CITY
 
 router = APIRouter(prefix="/aqi", tags=["AQI"])
@@ -15,3 +15,8 @@ def aqi_forecast():
 def aqi_history(days: int = 4):
     data = get_history(days)
     return {"history": data}
+
+@router.get("/today")
+def today_aqi():
+    return get_today_avg_aqi()
+

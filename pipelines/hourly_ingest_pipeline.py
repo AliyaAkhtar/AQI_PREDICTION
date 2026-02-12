@@ -98,7 +98,7 @@ def run_hourly_ingestion():
 
     df["city"] = CITY
 
-    history_df = load_recent_history(hours=72, city=CITY)
+    history_df = load_recent_history(hours=200, city=CITY)
 
     df = pd.concat([history_df, df]).sort_values("timestamp").reset_index(drop=True)
 
@@ -115,8 +115,19 @@ def run_hourly_ingestion():
     df = add_weather_interactions(df)
 
     # Keep only newest rows & drop incomplete feature rows
+    # df = df[df["timestamp"] >= start_time]
+    # df = df.dropna()
+
     df = df[df["timestamp"] >= start_time]
-    df = df.dropna()
+
+    # Only drop rows missing CORE values, not lag features
+    required_cols = [
+        "pm2_5", "pm10", "no2", "so2", "o3", "co",
+        "temperature_2m", "relativehumidity_2m",
+        "pressure_msl", "windspeed_10m"
+    ]
+
+    df = df.dropna(subset=required_cols)
 
     upsert_features(df)
 
