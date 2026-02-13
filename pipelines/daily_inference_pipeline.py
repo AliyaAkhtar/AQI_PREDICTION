@@ -143,9 +143,9 @@ MONGO_DB = "aqi_prediction"
 FEATURES_COLLECTION = "features_karachi_hourly"
 PREDICTIONS_COLLECTION = "aqi_forecasts_daily"
 
-CITY = os.getenv("CITY")
-LAT = float(os.getenv("LAT"))
-LON = float(os.getenv("LON"))
+CITY = "Karachi"
+LAT = "24.8607"
+LON = "67.0011"
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI"))
@@ -264,6 +264,7 @@ def predict_next_3_days(model, feature_names, latest_df):
 
     # Predict hourly AQI
     hourly_preds = model.predict(X)
+
     if len(hourly_preds.shape) > 1:
         hourly_preds = hourly_preds.mean(axis=1)
     future_df["predicted_aqi"] = np.clip(hourly_preds, 0, None)
@@ -303,43 +304,128 @@ def get_latest_features():
     return df
 
 # ================== CHECK EXISTING PREDICTIONS ==================
+# def check_existing_predictions():
+#     today = pd.Timestamp.utcnow().normalize()
+#     if today.tzinfo is None:  # only localize if naive
+#         today = today.tz_localize("UTC")
+#     existing = list(preds_col.find({"date": {"$gte": today}}).sort("date", 1))
+#     return pd.DataFrame(existing)
 def check_existing_predictions():
     today = pd.Timestamp.utcnow().normalize()
-    if today.tzinfo is None:  # only localize if naive
+    if today.tzinfo is None:
         today = today.tz_localize("UTC")
-    existing = list(preds_col.find({"date": {"$gte": today}}).sort("date", 1))
+
+    existing = list(
+        preds_col.find({"date": {"$gt": today}}).sort("date", 1)
+    )
     return pd.DataFrame(existing)
 
 # ================== RUN INFERENCE ==================
-def run_inference():
-    existing = check_existing_predictions()
-    if len(existing) >= 3:
-        print("Using cached predictions")
-        return existing
+# def run_inference():
+#     existing = check_existing_predictions()
+#     if len(existing) >= 3:
+#         print("Using cached predictions")
+#         return existing
 
+#     model, feature_names = load_production_model()
+#     latest_df = get_latest_features()
+#     daily_preds = predict_next_3_days(model, feature_names, latest_df)
+#     if daily_preds.empty:
+#         print("No new predictions available.")
+#         return daily_preds
+
+#     # Convert date column → python datetime for MongoDB
+#     daily_preds["date"] = pd.to_datetime(daily_preds["date"]).dt.tz_convert(None)
+
+#     # Delete existing predictions for next 3 days
+#     today = pd.Timestamp.utcnow().normalize()
+#     preds_col.delete_many({"date": {"$gte": today}})
+
+#     # Insert new predictions safely
+#     records = daily_preds.to_dict("records")
+#     if records:
+#         preds_col.insert_many(records)
+#         print("Saved new AQI forecast")
+#     else:
+#         print("No records to save")
+
+#     return daily_preds
+
+def run_inference():
+    today = pd.Timestamp.utcnow().normalize()
+
+    # Get existing future predictions
+    existing = list(
+        preds_col.find({"date": {"$gt": today}}).sort("date", 1)
+    )
+    existing_df = pd.DataFrame(existing)
+
+    existing_dates = set()
+    if not existing_df.empty:
+        existing_df["date"] = pd.to_datetime(existing_df["date"]).dt.normalize()
+        existing_dates = set(existing_df["date"])
+
+    # Required future dates (next 3 days strictly future)
+    target_dates = [
+        today + timedelta(days=1),
+        today + timedelta(days=2),
+        today + timedelta(days=3),
+    ]
+
+    missing_dates = [d for d in target_dates if d not in existing_dates]
+
+    if not missing_dates:
+        print("Using cached predictions")
+        return existing_df
+
+    print(f"Need to predict: {missing_dates}")
+
+    # Load model once
     model, feature_names = load_production_model()
     latest_df = get_latest_features()
-    daily_preds = predict_next_3_days(model, feature_names, latest_df)
-    if daily_preds.empty:
-        print("No new predictions available.")
-        return daily_preds
 
-    # Convert date column → python datetime for MongoDB
-    daily_preds["date"] = pd.to_datetime(daily_preds["date"]).dt.tz_convert(None)
+    # We only predict up to the furthest missing day
+    max_missing_day = max(missing_dates)
+    days_ahead = (max_missing_day - today).days
 
-    # Delete existing predictions for next 3 days
-    today = pd.Timestamp.utcnow().normalize()
-    preds_col.delete_many({"date": {"$gte": today}})
+    # Generate hourly predictions only for required horizon
+    future_df = generate_future_features(latest_df, hours=24 * days_ahead)
 
-    # Insert new predictions safely
-    records = daily_preds.to_dict("records")
-    if records:
-        preds_col.insert_many(records)
-        print("Saved new AQI forecast")
-    else:
-        print("No records to save")
+    X = future_df.reindex(columns=feature_names).ffill().bfill().fillna(0)
+    # hourly_preds = model.predict(X)
+    # future_df["predicted_aqi"] = np.clip(hourly_preds, 0, None)
 
-    return daily_preds
+    hourly_preds = model.predict(X)
+
+    # Fix for multi-output model
+    if len(hourly_preds.shape) > 1:
+        hourly_preds = hourly_preds.mean(axis=1)
+
+    hourly_preds = np.clip(hourly_preds, 0, None)
+    future_df["predicted_aqi"] = hourly_preds
+
+    # Aggregate daily
+    future_df["date"] = future_df["timestamp"].dt.normalize()
+    daily_avg = (
+        future_df.groupby("date")["predicted_aqi"]
+        .mean()
+        .reset_index()
+        .rename(columns={"predicted_aqi": "avg_aqi"})
+    )
+
+    # Keep only missing ones
+    daily_avg = daily_avg[daily_avg["date"].isin(missing_dates)]
+
+    if not daily_avg.empty:
+        daily_avg["date"] = pd.to_datetime(daily_avg["date"]).dt.to_pydatetime()
+        preds_col.insert_many(daily_avg.to_dict("records"))
+        print("Inserted only missing forecast days")
+
+    # Return updated 3-day window
+    final = list(
+        preds_col.find({"date": {"$gt": today}}).sort("date", 1)
+    )
+    return pd.DataFrame(final)
 
 # ================== MAIN ==================
 if __name__ == "__main__":
