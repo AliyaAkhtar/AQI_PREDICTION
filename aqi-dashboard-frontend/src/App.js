@@ -65,8 +65,8 @@ function App() {
       setLoading(true);
       try {
         const historyRes = await axios.get(`${API_BASE}/aqi/history?days=${selectedTimeRange}`);
-        const history = historyRes.data.history.map(item => ({
-          date: new Date(item.timestamp).toLocaleString("en-US", {
+        const history = historyRes.data.history.history.map(item => ({
+          date: new Date(item.date).toLocaleString("en-US", {
             weekday: "short",
             year: "numeric",
             month: "short",

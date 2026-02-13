@@ -30,3 +30,8 @@ app.include_router(aqi.router)
 @app.get("/")
 def root():
     return {"message": "AQI Forecast API is running"}
+
+# This is important for Vercel
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
