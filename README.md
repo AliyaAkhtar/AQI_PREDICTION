@@ -124,7 +124,3 @@ streamlit run app.py
 * Historical AQI is fetched automatically on load.
 * Interactive graph shows **historical AQI** and **3-day forecast**.
 * Monitor **production model performance metrics** in the dashboard table.
-
-## 🔹 Streamlit Badge Example
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://YOUR_DEPLOYED_STREAMLIT_URL.streamlit.app)
