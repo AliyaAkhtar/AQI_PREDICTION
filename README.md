@@ -4,6 +4,7 @@ A comprehensive **Air Quality Index (AQI) Prediction System** for real-time moni
 
 ## 🔹 Table of Contents
 - [Overview](#overview)
+- [Live Demo](#livedemo)
 - [System Architecture](#system-architecture)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
@@ -23,6 +24,11 @@ Air pollution is a major public health concern, and timely AQI information is cr
 
 The system is designed to support **real-time AQI monitoring, forecasting, and visualization** for Karachi area.
 
+## 🔹 Live Demo
+
+AQI Prediction App Deployed:
+👉 https://aqiprediction-ztsbvrbcmzttrd8qbrsx4u.streamlit.app/
+
 ## 🔹 System Architecture
 
 The AQI Prediction System is built using a **modular architecture**:
@@ -38,12 +44,9 @@ The AQI Prediction System is built using a **modular architecture**:
    - Trains regression models (Random Forest, XGBoost, Ridge & LightGBM) to predict AQI for future 3 days.  
    - Tracks model metrics in **MLflow** for reproducibility.
 
-4. **API Layer**  
-   - FastAPI backend exposes endpoints to fetch historical data, forecasts, and model metrics.
-
-5. **Frontend Dashboard**  
-   - React-based dashboard that visualizes AQI trends interactively.  
-   - Supports dynamic time range selection and chart types (Line/Area).  
+4. **Frontend Dashboard**  
+   - Streamlit dashboard that visualizes AQI trends interactively.  
+   - Displays the different metrics of models for comparison 
 
 ## 🔹 Features
 
@@ -51,14 +54,12 @@ The AQI Prediction System is built using a **modular architecture**:
 - Historical AQI analytics (hourly data)  
 - 3-day AQI forecast with full day names and formatted dates  
 - Color-coded AQI levels based on **EPA standards**  
-- Interactive line/area charts  
 - Production model tracking and evaluation metrics (MAE/RMSE)  
 - Historical AQI visualization in an interactive graph  
 
 ## 🔹 Tech Stack
 
-- **Backend**: Python, FastAPI  
-- **Frontend**: React, Recharts, CSS  
+- **Frontend**: Streamlit 
 - **Feature Store**: MongoDB (for historical and feature data)  
 - **Machine Learning**: scikit-learn, pandas, numpy  
 - **Model Tracking**: MLflow, DagsHub  
@@ -68,8 +69,7 @@ The AQI Prediction System is built using a **modular architecture**:
 
 ```text
 .
-├── api/                       # Backend FastAPI code, routes, controllers
-├── aqi-dashboard-frontend/    # React frontend for AQI visualization
+├── streamlit_app/             # Frontend for AQI visualization
 ├── config/                    # Configuration files for settings
 ├── data_sources/              # Raw AQI or environmental data using different apis
 ├── feature_store/             # Connecting Mongodb as feature store
@@ -85,10 +85,9 @@ The AQI Prediction System is built using a **modular architecture**:
 
 **Key Notes:**
 
-* `api/` exposes endpoints like `/aqi/history` and `/aqi/forecast`.
 * `feature_store/` stores processed features ready for model input.
 * `models/` contains production-ready and experimental model versions.
-* `aqi-dashboard-frontend/` consumes API endpoints and renders charts & cards.
+* `streamlit_app/` renders charts & cards.
 
 ## 🔹 Installation & Setup
 
@@ -99,7 +98,7 @@ git clone https://github.com/AliyaAkhtar/AQI_PREDICTION.git
 cd AQI_PREDICTION
 ```
 
-### 2. Backend Setup
+### 2. Create virtual environment
 
 ```bash
 python -m venv venv
@@ -112,34 +111,20 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 3. Run Backend API
+### 3. App Setup
 
 ```bash
-uvicorn api.main:app --reload
-```
-
-### 4. Frontend Setup
-
-```bash
-cd aqi-dashboard-frontend
-npm install
-npm start
+cd streamlit_app
+streamlit run app.py
 ```
 
 ## 🔹 Usage
 
-* Access dashboard at: `http://localhost:3000`
+* Access deployed dashboard at: `https://aqiprediction-ztsbvrbcmzttrd8qbrsx4u.streamlit.app/`
 * Historical AQI is fetched automatically on load.
 * Interactive graph shows **historical AQI** and **3-day forecast**.
 * Monitor **production model performance metrics** in the dashboard table.
 
-## 🔹 API Endpoints
+## 🔹 Streamlit Badge Example
 
-| Endpoint                 | Method | Description                            |
-| ------------------------ | ------ | -------------------------------------- |
-| `/aqi/history?days=4`    | GET    | Fetch historical AQI for last 4 days   |
-| `/aqi/forecast`          | GET    | Fetch 3-day AQI forecast               |
-| `/models/metrics/latest` | GET    | Fetch production & other model metrics |
-
-* Dashboard automatically fetches historical AQI and updates the interactive graph.
-* AQI values are color-coded based on **EPA standards**.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://YOUR_DEPLOYED_STREAMLIT_URL.streamlit.app)
