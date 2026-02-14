@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-cors
-mlflow
-pymongo
-python-dotenv
