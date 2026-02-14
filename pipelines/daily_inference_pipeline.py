@@ -321,36 +321,6 @@ def check_existing_predictions():
     return pd.DataFrame(existing)
 
 # ================== RUN INFERENCE ==================
-# def run_inference():
-#     existing = check_existing_predictions()
-#     if len(existing) >= 3:
-#         print("Using cached predictions")
-#         return existing
-
-#     model, feature_names = load_production_model()
-#     latest_df = get_latest_features()
-#     daily_preds = predict_next_3_days(model, feature_names, latest_df)
-#     if daily_preds.empty:
-#         print("No new predictions available.")
-#         return daily_preds
-
-#     # Convert date column → python datetime for MongoDB
-#     daily_preds["date"] = pd.to_datetime(daily_preds["date"]).dt.tz_convert(None)
-
-#     # Delete existing predictions for next 3 days
-#     today = pd.Timestamp.utcnow().normalize()
-#     preds_col.delete_many({"date": {"$gte": today}})
-
-#     # Insert new predictions safely
-#     records = daily_preds.to_dict("records")
-#     if records:
-#         preds_col.insert_many(records)
-#         print("Saved new AQI forecast")
-#     else:
-#         print("No records to save")
-
-#     return daily_preds
-
 def run_inference():
     today = pd.Timestamp.utcnow().normalize()
 
