@@ -646,7 +646,7 @@ def main():
                     </div>
                     <span style="color: #64748b; font-weight: 600; font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 0.25rem 0.75rem; border-radius: 20px;">{level['range']}</span>
                 </div>
-                <div style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
+                <div style="font-size: 0.85rem; color: #475569 !important; line-height: 1.5;">
                     {level['desc']}
                 </div>
             </div>
@@ -777,7 +777,7 @@ def main():
                 gridcolor='rgba(148,163,184,0.08)',
                 gridwidth=1,
                 title=None,
-                tickfont=dict(size=12, color='#94a3b8'),
+                tickfont=dict(size=12, color='#475569'),
                 showline=True,
                 linecolor='rgba(148, 163, 184, 0.2)',
                 linewidth=2
@@ -788,9 +788,9 @@ def main():
                 gridwidth=1,
                 title=dict(
                     text='AQI Value',
-                    font=dict(size=14, color='#cbd5e1')
+                    font=dict(size=14, color='#475569')
                 ),
-                tickfont=dict(size=12, color='#94a3b8'),
+                tickfont=dict(size=12, color='#475569'),
                 showline=True,
                 linecolor='rgba(148, 163, 184, 0.2)',
                 linewidth=2
