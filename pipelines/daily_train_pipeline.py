@@ -40,7 +40,17 @@ def prepare_data(df):
         "us_aqi",   
         "aqi_t_plus_24",
         "aqi_t_plus_48",
-        "aqi_t_plus_72"
+        "aqi_t_plus_72",
+        'pm2_5_lag_12',      # Low SHAP value
+        'aqi_lag_24h',       # Redundant
+        'hour_cos',          # Low importance
+        'day_of_week',       # Low importance
+        'dow_sin',           # Low importance
+        'dow_cos',           # Low importance
+        'pm2_5_roll_mean_24',# Low importance
+        'pm2_5_lag_72',      # Low importance
+        'AQI_24h_avg',       # Redundant
+        'month'              # Low importance
     ]
 
     X = df.drop(columns=[c for c in drop_cols if c in df.columns])

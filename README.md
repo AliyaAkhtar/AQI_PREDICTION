@@ -76,6 +76,7 @@ The AQI Prediction System is built using a **modular architecture**:
 ├── features/                  # Scripts to build lag and derived features
 ├── models/                    # Train ML models and saved artifacts
 ├── pipelines/                 # Automated ML pipelines for training and evaluation
+├── notebooks& shap results/   # Shows the EDA and SHAP analysis results
 ├── .github/workflows/         # CI/CD pipelines for deployment or model training
 ├── .gitignore
 ├── mlflow.db                  # MLflow database for model tracking
